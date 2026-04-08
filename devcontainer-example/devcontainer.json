@@ -43,8 +43,13 @@
   "dockerComposeFile": "./docker-compose.yml",
   "service": "frappe",
   "workspaceFolder": "/workspace/development",
+  "containerEnv": {
+    "DISPLAY": "${localEnv.DISPLAY}",
+    "LIBGL_ALWAYS_SOFTWARE": "1"
+  },
   "shutdownAction": "stopCompose",
   "mounts": [
-    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/frappe/.ssh,type=bind,consistency=cached"
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/frappe/.ssh,type=bind,consistency=cached",
+    "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind"
   ]
 }
