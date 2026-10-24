@@ -2,7 +2,7 @@
 
 Before publishing a PR, please test builds locally.
 
-On each PR that contains changes relevant to Docker builds, images are being built and tested in our CI (GitHub Actions).
+On each commit to `main` that contains changes relevant to Docker builds, images are built and tested in our CI (GitHub Actions). Pull requests are not built by CI, so please test builds locally before publishing a PR.
 
 > :evergreen_tree: Please be considerate when pushing commits and opening PR for multiple branches, as the process of building images uses energy and contributes to global warming.
 
