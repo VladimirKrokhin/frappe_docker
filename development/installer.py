@@ -111,7 +111,7 @@ def get_args_parser():
         action="store",
         type=str,
         help="Database type to use (e.g., mariadb or postgres)",
-        default="mariadb",  # Set your default database type here
+        default="postgres",  # Set your default database type here
     )
     return parser
 
@@ -189,8 +189,12 @@ def init_bench_if_not_exist(args):
             cwd=os.getcwd() + "/" + args.bench_name,
         )
         cprint("Set developer_mode", level=3)
+        # developer_mode=1 заставляет socketio строить URL самообращения как
+        # `https://<origin>:webserver_port`. За HTTPS-прокси (dev/stage) это
+        # ломает realtime («Нет связи»). Vite-dev работает и без него —
+        # get_bootinfo_for_dev разрешён на тестовых/локальных сайтах.
         subprocess.call(
-            ["bench", "set-config", "-gp", "developer_mode", "1"],
+            ["bench", "set-config", "-gp", "developer_mode", "0"],
             cwd=os.getcwd() + "/" + args.bench_name,
         )
     except subprocess.CalledProcessError as e:
