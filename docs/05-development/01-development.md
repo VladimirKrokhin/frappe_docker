@@ -143,6 +143,19 @@ For any reason the above commands fail, set the values in `common_site_config.js
 }
 ```
 
+### Configure Chromium for PDF generation
+
+For Frappe v16 and later, configure the bench to use Chromium included in the
+bench image. Run this from the bench directory, including for existing benches:
+
+```shell
+bench set-config -g chromium_path /usr/lib/chromium/chromium-headless-shell
+```
+
+Without this setting, Frappe downloads a separate browser that may fail to start
+because of missing system libraries. The `development/installer.py` script sets
+this automatically for new benches.
+
 ### Edit Honcho's Procfile
 
 Note : With the option '--skip-redis-config-generation' during bench init, these actions are no more needed. But at least, take a look to ProcFile to see what going on when bench launch honcho on start command
@@ -378,7 +391,7 @@ The first command can take a few seconds to be executed, this is to be expected.
 
 ## Manually start containers
 
-In case you don't use VSCode, you may start the containers manually with the following command:
+The example configuration forwards development ports through VS Code and does not publish them through Docker. If you don't use VS Code, first follow the [CLI-only port configuration](04-alternate-setup.md#configure-ports-for-cli-only-use), then start the containers manually:
 
 ### Running the containers
 

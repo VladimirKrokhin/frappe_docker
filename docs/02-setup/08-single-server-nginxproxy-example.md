@@ -15,7 +15,7 @@ We will setup the following:
 
 ## Requirements
 
-- A server that can run Docker (recommended: 2 vCPU, 4 GB RAM, 50 GB SSD).
+- A server that can run Docker Engine **v23.0+** (recommended: 2 vCPU, 4 GB RAM, 50 GB SSD).
 - A public domain with DNS control.
 - Two subdomains pointing to your server IP (A/AAAA records):
   - `erp.your-domain.com`
@@ -84,23 +84,15 @@ cat > ~/gitops/apps.json <<'EOF'
 EOF
 ```
 
-Generate the BASE64 value and build:
+Use a [compatible builder](02-build-setup.md#builder-compatibility) and pass `apps.json` as a [BuildKit secret](https://docs.docker.com/build/building/secrets/) to keep private repository tokens out of image metadata:
 
 ```shell
-export APPS_JSON_BASE64=$(base64 -w 0 ~/gitops/apps.json)
-
 docker build \
   --build-arg=FRAPPE_PATH=https://github.com/frappe/frappe \
   --build-arg=FRAPPE_BRANCH=version-16 \
-  --build-arg=APPS_JSON_BASE64=$APPS_JSON_BASE64 \
+  --secret=id=apps_json,src=$HOME/gitops/apps.json \
   --tag=my-erpnext-prod-image:16.0.0 \
   --file=images/layered/Containerfile .
-```
-
-If `base64 -w 0` is not available on your system, use:
-
-```shell
-export APPS_JSON_BASE64=$(base64 ~/gitops/apps.json | tr -d '\n')
 ```
 
 ### Configure environment
@@ -112,12 +104,16 @@ cp example.env ~/gitops/erpnext.env
 sed -i 's/DB_PASSWORD=123/DB_PASSWORD=changeit/g' ~/gitops/erpnext.env
 echo 'NGINX_PROXY_HOSTS=erp.your-domain.com,crm.your-domain.com' >> ~/gitops/erpnext.env
 echo 'LETSENCRYPT_EMAIL=admin@your-domain.com' >> ~/gitops/erpnext.env
+echo 'FORWARDED_ALLOW_IPS=*' >> ~/gitops/erpnext.env
 ```
 
 Notes:
 
 - Replace `changeit` with a strong password.
 - Replace domains and email with your production values.
+- `FORWARDED_ALLOW_IPS=*` trusts the stack's internal callers for forwarded HTTPS
+  information. Keep Gunicorn's port unpublished and review any additional networks.
+  See [forwarded HTTPS setup](../11-how-to/13-configure-forwarded-https.md).
 - `NGINX_PROXY_HOSTS` is a comma-separated list without spaces.
 - If you built a custom image, add:
 
@@ -148,6 +144,11 @@ docker compose --project-name erpnext -f ~/gitops/erpnext.yaml up -d
 
 This starts MariaDB and Redis containers as part of the same stack.
 
+This recipe assumes nginx-proxy is the public edge and sets
+`TRUST_DOWNSTREAM_PROXY=false`. If another proxy precedes it, review
+[proxy trust boundaries](../13-explanation/04-tls-ssl-approaches.md#forwarded-protocol-and-trust-boundaries)
+before enabling upstream header trust.
+
 ### Create sites
 
 ```shell
@@ -157,7 +158,7 @@ docker compose --project-name erpnext exec backend \
 
 # crm.your-domain.com
 docker compose --project-name erpnext exec backend \
-  bench new-site --mariadb-user-host-login-scope=% --db-root-password changeit --install-app erpnext --admin-password changeit crm.your-domain.com
+  bench new-site --mariadb-user-host-login-scope=% --db-root-password changeit --install-app crm --admin-password changeit crm.your-domain.com
 ```
 
 ### Notes
