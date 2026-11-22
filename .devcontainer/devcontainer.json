@@ -52,14 +52,13 @@
     "--network=host"
   ],
   "containerEnv": {
-    "DISPLAY": "${localEnv.DISPLAY}",
+    "DISPLAY": "${localEnv:DISPLAY}",
     "LIBGL_ALWAYS_SOFTWARE": "1",
     "HTTP_PROXY": "",
     "HTTPS_PROXY": "",
     "NO_PROXY": "*",
     "http_proxy": "",
-    "https_proxy": "",
-    "PATH": "/home/frappe/.nvm/versions/node/v24.20.0/bin:${containerEnv:PATH}"
+    "https_proxy": ""
   },
   "shutdownAction": "stopCompose",
   "mounts": [
