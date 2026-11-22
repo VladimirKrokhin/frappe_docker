@@ -9,7 +9,7 @@
         "ms-vscode.live-server",
         "grapecity.gc-excelviewer",
         "mtxr.sqltools",
-        "mtxr.sqltools-driver-mysql",
+        "mtxr.sqltools-driver-pg",
         "visualstudioexptteam.vscodeintellicode"
       ],
       "settings": {
@@ -22,19 +22,15 @@
         "debug.node.autoAttach": "disabled",
         "sqltools.connections": [
           {
-            "mysqlOptions": {
-              "authProtocol": "default",
-              "enableSsl": "Disabled"
-            },
             "ssh": "Disabled",
             "previewLimit": 50,
-            "server": "mariadb",
-            "port": 3306,
-            "driver": "MariaDB",
-            "name": "MariaDB",
+            "server": "postgresql",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "PostgreSQL",
             "username": "root",
             "password": "123",
-            "database": "mysql"
+            "database": "postgres"
           }
         ]
       }
@@ -43,8 +39,13 @@
   "dockerComposeFile": "./docker-compose.yml",
   "service": "frappe",
   "workspaceFolder": "/workspace/development",
+  "containerEnv": {
+    "DISPLAY": "${localEnv.DISPLAY}",
+    "LIBGL_ALWAYS_SOFTWARE": "1"
+  },
   "shutdownAction": "stopCompose",
   "mounts": [
-    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/frappe/.ssh,type=bind,consistency=cached"
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/frappe/.ssh,type=bind,consistency=cached",
+    "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind"
   ]
 }
